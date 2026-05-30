@@ -1,0 +1,36 @@
+name: Deploy NutriSnap
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'nutrisnap.html'
+
+jobs:
+  deploy:
+    name: Deploy to VPS
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Deploy nutrisnap.html to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: "nutrisnap.html"
+          target: "/root/content-mate-v2/content_mate_v2.2/videos/"
+
+      - name: Confirm deployment
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            echo "✅ NutriSnap deployed at $(date)"
+            ls -lh /root/content-mate-v2/content_mate_v2.2/videos/nutrisnap.html
