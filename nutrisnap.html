@@ -446,7 +446,7 @@ function handleUpload(e){const f=e.target.files[0];if(!f)return;const r=new File
 async function analyzeImg(dataUrl){
   const btns=document.querySelectorAll('.cam-btns .btn-sec');btns.forEach(b=>{b._orig=b.innerHTML;b.innerHTML='<span class="spinner"></span> Analyzing...';b.disabled=true;});
   try{
-    const resp=await fetch('https://nutrisnap.srv1151834.hstgr.cloud/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({image:dataUrl})});
+    const resp=await fetch('https://nutrisnap.srv1151834.hstgr.cloud/analyze',{method:'POST',headers:{'Content-Type':'application/json','X-Nutrisnap-Key':'be1acdc73e0aa5ac4643bf593bc8543ca4767274c12984ce3b531a151e0901a0'},body:JSON.stringify({image:dataUrl})});
     const r=await resp.json();
     el('ai-fname').textContent=r.food||'Unknown food';el('ai-cal').textContent=Math.round(r.calories||0);el('ai-p').textContent=Math.round(r.protein_g||0)+'g';el('ai-f').textContent=Math.round(r.fat_g||0)+'g';el('ai-c').textContent=Math.round(r.carbs_g||0)+'g';
     el('ai-note').textContent='Confidence: '+(r.confidence||'medium')+' — '+(r.note||'AI estimate');
@@ -493,7 +493,14 @@ function renderLog(){
   empty.style.display='none';
   const existing=new Set([...list.querySelectorAll('.log-item')].map(i=>i.dataset.id));const current=new Set(S.log.map(e=>String(e.id)));
   existing.forEach(id=>{if(!current.has(id))list.querySelector('[data-id="'+id+'"]')?.remove();});
-  S.log.forEach(e=>{if(!existing.has(String(e.id))){const d=document.createElement('div');d.className='log-item';d.dataset.id=e.id;d.innerHTML=`<div class="li-info"><div class="li-name">${e.name}</div><div class="li-macros">P:${e.protein}g · F:${e.fat}g · C:${e.carbs}g</div></div><div class="li-cal">${e.cal} kcal</div><button class="li-del" onclick="delLog(${e.id})"><i class="ti ti-trash"></i></button>`;list.appendChild(d);}});
+  S.log.forEach(e=>{if(!existing.has(String(e.id))){const d=document.createElement('div');d.className='log-item';d.dataset.id=e.id;
+    const info=document.createElement('div');info.className='li-info';
+    const name=document.createElement('div');name.className='li-name';name.textContent=e.name;
+    const macros=document.createElement('div');macros.className='li-macros';macros.textContent='P:'+e.protein+'g · F:'+e.fat+'g · C:'+e.carbs+'g';
+    info.appendChild(name);info.appendChild(macros);
+    const cal=document.createElement('div');cal.className='li-cal';cal.textContent=e.cal+' kcal';
+    const del=document.createElement('button');del.className='li-del';del.innerHTML='<i class="ti ti-trash"></i>';del.onclick=()=>delLog(e.id);
+    d.appendChild(info);d.appendChild(cal);d.appendChild(del);list.appendChild(d);}});
 }
 function updateTotals(){
   const t=S.log.reduce((a,e)=>({cal:a.cal+e.cal,protein:a.protein+e.protein,fat:a.fat+e.fat,carbs:a.carbs+e.carbs}),{cal:0,protein:0,fat:0,carbs:0});
