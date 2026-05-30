@@ -1,4 +1,4 @@
-# NutriSnap — AI Macro Tracker
+# NutriSnap - AI Macro Tracker
 
 I built this because I got tired of trying to figure out what I'm actually eating.
 
