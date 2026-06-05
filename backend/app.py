@@ -46,8 +46,10 @@ def require_secret(f):
     def decorated(*args, **kwargs):
         if request.method == "OPTIONS":
             return f(*args, **kwargs)
+        # Accept either a secret header (server-to-server) or a trusted origin (browser)
         token = request.headers.get("X-Nutrisnap-Key", "")
-        if token != PROXY_SECRET:
+        origin = request.headers.get("Origin", "")
+        if token != PROXY_SECRET and origin != ALLOWED_ORIGIN:
             return jsonify({"error": "unauthorized"}), 401
         return f(*args, **kwargs)
     return decorated

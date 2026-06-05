@@ -444,9 +444,9 @@ async function startCamera(){try{const s=await navigator.mediaDevices.getUserMed
 function snapPhoto(){const v=el('snap-video'),c=el('snap-canvas');c.width=v.videoWidth;c.height=v.videoHeight;c.getContext('2d').drawImage(v,0,0);analyzeImg(c.toDataURL('image/jpeg',0.8));}
 function handleUpload(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>analyzeImg(ev.target.result);r.readAsDataURL(f);}
 async function analyzeImg(dataUrl){
-  const btns=document.querySelectorAll('.cam-btns .btn-sec');btns.forEach(b=>{b._orig=b.innerHTML;b.innerHTML='<span class="spinner"></span> Analyzing...';b.disabled=true;});
+  const btns=document.querySelectorAll('.cam-btns .btn-sec');btns.forEach(b=>{b._orig=b.textContent;b.textContent='Analyzing...';b.disabled=true;});
   try{
-    const resp=await fetch('https://nutrisnap.srv1151834.hstgr.cloud/analyze',{method:'POST',headers:{'Content-Type':'application/json','X-Nutrisnap-Key':'be1acdc73e0aa5ac4643bf593bc8543ca4767274c12984ce3b531a151e0901a0'},body:JSON.stringify({image:dataUrl})});
+    const resp=await fetch('https://nutrisnap.srv1151834.hstgr.cloud/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({image:dataUrl})});
     const r=await resp.json();
     el('ai-fname').textContent=r.food||'Unknown food';el('ai-cal').textContent=Math.round(r.calories||0);el('ai-p').textContent=Math.round(r.protein_g||0)+'g';el('ai-f').textContent=Math.round(r.fat_g||0)+'g';el('ai-c').textContent=Math.round(r.carbs_g||0)+'g';
     el('ai-note').textContent='Confidence: '+(r.confidence||'medium')+' — '+(r.note||'AI estimate');
@@ -460,7 +460,7 @@ async function analyzeImg(dataUrl){
     el('qty-unit-label').textContent=S.aiQty===1?'item':'items — tap to adjust';
     el('ai-box').classList.add('show');
   }catch(e){toast('Analysis failed — try again');}
-  btns.forEach(b=>{b.innerHTML=b._orig;b.disabled=false;});
+  btns.forEach(b=>{b.textContent=b._orig;b.disabled=false;});
 }
 async function lookupBC(){
   const code=el('bc-input').value.trim();if(!code){toast('Enter a barcode');return;}
