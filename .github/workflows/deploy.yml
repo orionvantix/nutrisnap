@@ -5,14 +5,13 @@ on:
     branches:
       - main
     paths:
-      - 'frontend/nutrisnap.html'
+      - 'frontend/**'
       - 'backend/**'
 
 jobs:
   deploy-frontend:
     name: Deploy Frontend
     runs-on: ubuntu-latest
-    if: contains(github.event.head_commit.modified, 'frontend/') || contains(github.event.head_commit.added, 'frontend/')
 
     steps:
       - name: Checkout
@@ -41,7 +40,6 @@ jobs:
   deploy-backend:
     name: Deploy Backend
     runs-on: ubuntu-latest
-    if: contains(github.event.head_commit.modified, 'backend/') || contains(github.event.head_commit.added, 'backend/')
 
     steps:
       - name: Checkout
