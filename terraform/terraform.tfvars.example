@@ -1,0 +1,8 @@
+hcloud_token     = "your-hetzner-api-token"
+ssh_public_key   = "ssh-ed25519 AAAA... your-public-key"
+openai_api_key   = "sk-proj-..."
+nutrisnap_secret = "your-random-secret-key"
+domain           = "nutrisnap.yourdomain.com"
+server_type      = "cx22"
+location         = "nbg1"
+environment      = "production"

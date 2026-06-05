@@ -5,32 +5,67 @@ on:
     branches:
       - main
     paths:
-      - 'nutrisnap.html'
+      - 'frontend/nutrisnap.html'
+      - 'backend/**'
 
 jobs:
-  deploy:
-    name: Deploy to VPS
+  deploy-frontend:
+    name: Deploy Frontend
     runs-on: ubuntu-latest
+    if: contains(github.event.head_commit.modified, 'frontend/') || contains(github.event.head_commit.added, 'frontend/')
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Deploy nutrisnap.html to VPS
+      - name: Copy to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          source: "nutrisnap.html"
+          source: "frontend/nutrisnap.html"
           target: "/root/content-mate-v2/content_mate_v2.2/videos/"
+          strip_components: 1
 
-      - name: Confirm deployment
+      - name: Confirm
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            echo "✅ NutriSnap deployed at $(date)"
+            echo "Frontend deployed at $(date)"
             ls -lh /root/content-mate-v2/content_mate_v2.2/videos/nutrisnap.html
+
+  deploy-backend:
+    name: Deploy Backend
+    runs-on: ubuntu-latest
+    if: contains(github.event.head_commit.modified, 'backend/') || contains(github.event.head_commit.added, 'backend/')
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Copy backend to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: "backend/"
+          target: "/root/nutrisnap/"
+
+      - name: Restart backend service
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            pip3 install -r /root/nutrisnap/backend/requirements.txt --break-system-packages -q
+            cp /root/nutrisnap/backend/app.py /root/nutrisnap_proxy.py
+            systemctl restart nutrisnap-proxy
+            sleep 2
+            systemctl is-active nutrisnap-proxy
+            echo "Backend deployed at $(date)"
